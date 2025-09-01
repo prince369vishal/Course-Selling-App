@@ -18,7 +18,6 @@ function adminMiddleware(req, res, next) {
       });
     }
   } catch (error) {}
-  const decoded = jwt.verify(token, JWT_SECRET);
 }
 
 module.exports = {
