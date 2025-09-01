@@ -1,9 +1,47 @@
+require("dotenv").config();
 const { Router } = require("express");
-
+const { UserModel } = require("../Database/db");
 const userRouter = Router();
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = process.env.USER_JWT_SECRET;
 
-userRouter.post("/signin", function (req, res) {});
-userRouter.post("/signin", function (req, res) {});
+userRouter.post("/signup", async function (req, res) {
+  const { email, password, firstName, lastName } = req.body;
+
+  try {
+    await UserModel.create({
+      email,
+      password,
+      firstName,
+      lastName,
+    });
+  } catch (error) {
+    res.json({
+      message: "Something went wrong",
+    });
+  }
+
+  res.json({
+    message: "Signup successful",
+  });
+});
+userRouter.post("/signin", async function (req, res) {
+  const { email, password } = req.body;
+
+  const user = await UserModel.findOne({ email, password });
+
+  if (user) {
+    const token = jwt.sign({ id: user._id }, JWT_SECRET);
+    res.json({
+      token: token,
+    });
+  } else {
+    res.status(403).json({
+      message: "Incorrect Credentials",
+    });
+  }
+});
+
 userRouter.get("/purchases", function (req, res) {});
 
 module.exports = {
