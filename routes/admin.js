@@ -1,10 +1,11 @@
 require("dotenv").config();
 const { Router } = require("express");
-const { AdminModel } = require("../Database/db");
+const { AdminModel, CourseModel } = require("../Database/db");
 const adminRouter = Router();
 const { z } = require("zod");
 
 const jwt = require("jsonwebtoken");
+const { adminMiddleware } = require("../middleware/admin");
 const JWT_SECRET = process.env.ADMIN_JWT_SECRET;
 
 adminRouter.post("/signup", async function (req, res) {
@@ -44,7 +45,23 @@ adminRouter.post("/signin", async function (req, res) {
     console.log(error);
   }
 });
-adminRouter.post("/course", function (req, res) {});
+
+adminRouter.post("/course", adminMiddleware, async function (req, res) {
+  const creatorId = req.userId;
+
+  const { title, description, imageURL, price } = req.body;
+  const course = await CourseModel.create({
+    title,
+    description,
+    imageURL,
+    price,
+    creatorId,
+  });
+  res.json({
+    message: "course Created",
+    courseId: course._id,
+  });
+});
 adminRouter.put("/course", function (req, res) {});
 adminRouter.get("/course/bulk", function (req, res) {});
 
